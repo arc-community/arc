@@ -1,20 +1,17 @@
-#!/usr/bin/env python3
-
-from typing import Optional
-
-import itertools as itt
-import random
-import json
 from pathlib import Path
-import requests
-from loguru import logger
-import tqdm
+from typing import Optional
 from concurrent import futures
+from loguru import logger
+
+import json
+import random
+import requests
+import itertools as itt
+import tqdm
+
 from arc.utils import cache
 from arc.interface import Riddle
-from arc.settings import settings
-
-ARC_DATA_URL = "https://api.github.com/repos/fchollet/ARC/contents/data"
+from arc.settings import DATASET_DIR, ARC_DATA_URL
 
 
 def download_arc_dataset(output_dir: Path):
@@ -58,8 +55,8 @@ def get_cached_dataset_dir() -> Path:
 
 
 def get_dataset_dir(subdir: Optional[str] = None) -> Path:
-    if settings.dataset_dir:
-        dataset_dir = Path(settings.dataset_dir)
+    if DATASET_DIR:
+        dataset_dir = Path(DATASET_DIR)
     else:
         dataset_dir = get_cached_dataset_dir()
     if subdir and subdir != "all":

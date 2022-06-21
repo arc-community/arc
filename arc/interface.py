@@ -1,17 +1,19 @@
-#!/usr/bin/env python3
-
 from typing import Optional
+from colored import fg, bg, attr
 
+import functools as fct
+import itertools as itt
 import pydantic
 import numpy as np
-import functools as fct
-from colored import fg, bg, attr
-import itertools as itt
-from arc.settings import settings
 
-CELL_PADDING_STR = " " * settings.cell_padding
-BOARD_GAP_STR = " " * settings.board_gap
-PAIR_GAP_STR = "\n" + " " * settings.pair_gap + "\n"
+from arc.settings import CELL_PADDING_STR, BOARD_GAP_STR, PAIR_GAP_STR
+
+
+__all__ = [
+    'Board',
+    'BoardPair',
+    'Riddle'
+]
 
 
 class Board(pydantic.BaseModel):

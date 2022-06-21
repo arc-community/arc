@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-
-from arc.settings import settings
 from pathlib import Path
+
 import filelock
+
+from arc.settings import CACHE_PATH
 
 
 def get_cache_dir(subdir: str = None) -> Path:
@@ -12,7 +12,7 @@ def get_cache_dir(subdir: str = None) -> Path:
     :param subdir: Subdirectory to create.
     :return: Path to the cache directory.
     """
-    cache_dir = Path(settings.cache_path)
+    cache_dir = Path(CACHE_PATH)
     if subdir:
         cache_dir = cache_dir / subdir
     if not cache_dir.exists():

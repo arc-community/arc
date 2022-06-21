@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
-
+from pathlib import Path
 from typing import Optional
 
 import typer
-from pathlib import Path
 
 from arc.utils import dataset
+
 
 app = typer.Typer()
 
