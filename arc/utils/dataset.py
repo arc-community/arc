@@ -69,7 +69,7 @@ def get_dataset_dir(subdir: Optional[str] = None) -> Path:
 
 def load_riddle_from_file(file_path: Path) -> Riddle:
     json_data = json.loads(file_path.read_text())
-    riddle = Riddle(**json_data, riddle_id=file_path.stem)
+    riddle = Riddle(**json_data, riddle_id=file_path.stem, subdir=file_path.parent.name)
     return riddle
 
 

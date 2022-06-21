@@ -106,11 +106,14 @@ class Riddle(pydantic.BaseModel):
     train: list[BoardPair]
     test: list[BoardPair]
     riddle_id: Optional[str] = None
+    subdir: Optional[str] = None
 
     def fmt(self, colored=False, with_test_outputs=False) -> str:
         parts = []
         if self.riddle_id:
             parts.append(f"ID: {self.riddle_id}")
+        if self.subdir:
+            parts.append(f"SUBDIR: {self.subdir}")
         for idx, train_pair in enumerate(self.train):
             parts.append(f"TRAIN {idx}")
             parts.append(train_pair.fmt(colored=colored))
