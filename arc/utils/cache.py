@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-from arc.settings import settings
 from pathlib import Path
+
 import filelock
+
+from arc.settings import settings
 
 
 def get_cache_dir(subdir: str = None) -> Path:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import os.path
 from typing import Optional
 
-import os.path
 import pydantic
 
 

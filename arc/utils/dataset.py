@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
+import itertools as itt
+import json
+import random
+from concurrent import futures
+from pathlib import Path
 from typing import Optional
 
-import itertools as itt
-import random
-import json
-from pathlib import Path
 import requests
-from loguru import logger
 import tqdm
-from concurrent import futures
-from arc.utils import cache
+from loguru import logger
+
 from arc.interface import Riddle
 from arc.settings import settings
+from arc.utils import cache
 
 ARC_DATA_URL = "https://api.github.com/repos/fchollet/ARC/contents/data"
 

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+import functools as fct
+import itertools as itt
 from typing import Optional
 
-import pydantic
 import numpy as np
-import functools as fct
-from colored import fg, bg, attr
-import itertools as itt
+import pydantic
+from colored import attr, bg, fg
+
 from arc.settings import settings
 
 CELL_PADDING_STR = " " * settings.cell_padding
