@@ -2,6 +2,7 @@
 
 from typing import Optional
 
+import itertools as itt
 import random
 import json
 from pathlib import Path
@@ -11,6 +12,7 @@ import tqdm
 from concurrent import futures
 from arc.utils import cache
 from arc.interface import Riddle
+from arc.settings import settings
 
 ARC_DATA_URL = "https://api.github.com/repos/fchollet/ARC/contents/data"
 
@@ -55,27 +57,37 @@ def get_cached_dataset_dir() -> Path:
     return cache_dir
 
 
+def get_dataset_dir(subdir: Optional[str] = None) -> Path:
+    if settings.dataset_dir:
+        dataset_dir = Path(settings.dataset_dir)
+    else:
+        dataset_dir = get_cached_dataset_dir()
+    if subdir and subdir != "all":
+        dataset_dir = dataset_dir / subdir
+    return dataset_dir
+
+
 def load_riddle_from_file(file_path: Path) -> Riddle:
     json_data = json.loads(file_path.read_text())
     riddle = Riddle(**json_data, riddle_id=file_path.stem)
     return riddle
 
 
-def get_riddles(dataset_dir: Optional[Path] = None) -> dict[str, Path]:
-    if not dataset_dir:
-        dataset_dir = get_cached_dataset_dir()
-    return dict((s.stem, s) for s in dataset_dir.rglob("*.json"))
+def get_riddles(subdirs: list[str] = ["training"]) -> dict[str, Path]:
+    if not subdirs:
+        subdirs = ['all']
+    return dict(itt.chain.from_iterable(((s.stem, s) for s in get_dataset_dir(subdir=sd).rglob("*.json")) for sd in subdirs))
 
 
-def get_riddle_ids(dataset_dir: Optional[Path] = None):
-    return list(get_riddles(dataset_dir=dataset_dir).keys())
+def get_riddle_ids(subdirs: list[str] = ["training"]):
+    return list(get_riddles(subdirs=subdirs).keys())
 
 
-def get_random_riddle_id(dataset_dir: Optional[Path] = None):
-    return random.choice(get_riddle_ids(dataset_dir=dataset_dir))
+def get_random_riddle_id(subdirs: list[str] = ["training"]):
+    return random.choice(get_riddle_ids(subdirs=subdirs))
 
 
-def load_riddle_from_id(riddle_id: str, dataset_dir: Optional[Path] = None) -> Riddle:
-    riddles = get_riddles(dataset_dir=dataset_dir)
+def load_riddle_from_id(riddle_id: str) -> Riddle:
+    riddles = get_riddles(subdirs=[])
     riddle_path = riddles[riddle_id]
     return load_riddle_from_file(riddle_path)
