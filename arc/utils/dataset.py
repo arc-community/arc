@@ -75,8 +75,13 @@ def load_riddle_from_file(file_path: Path) -> Riddle:
 
 def get_riddles(subdirs: list[str] = ["training"]) -> dict[str, Path]:
     if not subdirs:
-        subdirs = ['all']
-    return dict(itt.chain.from_iterable(((s.stem, s) for s in get_dataset_dir(subdir=sd).rglob("*.json")) for sd in subdirs))
+        subdirs = ["all"]
+    return dict(
+        itt.chain.from_iterable(
+            ((s.stem, s) for s in get_dataset_dir(subdir=sd).rglob("*.json"))
+            for sd in subdirs
+        )
+    )
 
 
 def get_riddle_ids(subdirs: list[str] = ["training"]):
