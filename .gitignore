@@ -3,5 +3,4 @@ __pycache__/
 *$py.class
 *.egg-info/
 
-.python-version
 /data
