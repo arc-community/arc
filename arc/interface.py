@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import functools as fct
 import itertools as itt
 from typing import Optional
 
@@ -23,7 +22,6 @@ class Board(pydantic.BaseModel):
         return self.__root__
 
     @property
-    @fct.lru_cache
     def as_np(self) -> np.ndarray:
         return np.array(self.data, dtype=np.int64)
 
