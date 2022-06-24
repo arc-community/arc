@@ -86,7 +86,7 @@ def get_riddles(subdirs: list[str] = ["training"]) -> dict[str, Path]:
 
 
 def get_riddle_ids(subdirs: list[str] = ["training"]):
-    return list(get_riddles(subdirs=subdirs).keys())
+    return list(sorted(get_riddles(subdirs=subdirs).keys()))
 
 
 def get_random_riddle_id(subdirs: list[str] = ["training"]):
