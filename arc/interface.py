@@ -107,31 +107,6 @@ class BoardPair(pydantic.BaseModel):
         return (self.input.np, self.output.np if with_solution else None)
 
 
-class EvalResult(pydantic.BaseModel):
-    riddle: "Riddle"
-    solution: list[BoardData]
-    board_size_scores: list[float]
-    board_content_scores: list[float]
-
-    @property
-    def board_size_score(self):
-        return min(self.board_size_scores)
-
-    @property
-    def board_size_correct(self):
-        return self.board_size_score == 1.0
-
-    @property
-    def score(self):
-        if not self.board_size_correct:
-            return 0.0
-        return min(self.board_content_scores)
-
-    @property
-    def correct(self):
-        return self.score == 1.0  # todo: is this affected by FP stuff?
-
-
 class Riddle(pydantic.BaseModel):
     train: list[BoardPair]
     test: list[BoardPair]
@@ -157,3 +132,31 @@ class Riddle(pydantic.BaseModel):
             [board.as_np(with_solution=True) for board in self.train],
             [board.as_np(with_solution=with_solution) for board in self.test],
         )
+
+
+class EvalResult(pydantic.BaseModel):
+    riddle: Riddle
+    solution: list[BoardData]
+    board_size_scores: list[float]
+    board_content_scores: list[float]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @property
+    def board_size_score(self):
+        return min(self.board_size_scores)
+
+    @property
+    def board_size_correct(self):
+        return self.board_size_score == 1.0
+
+    @property
+    def score(self):
+        if not self.board_size_correct:
+            return 0.0
+        return min(self.board_content_scores)
+
+    @property
+    def correct(self):
+        return self.score == 1.0  # todo: is this affected by FP stuff?
