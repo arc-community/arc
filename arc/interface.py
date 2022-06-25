@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import itertools as itt
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pydantic
@@ -14,6 +14,9 @@ BOARD_GAP_STR = " " * settings.board_gap
 PAIR_GAP_STR = "\n" + " " * settings.pair_gap + "\n"
 
 
+BoardData = Union[list[list[int]], np.ndarray]
+
+
 class Board(pydantic.BaseModel):
     __root__: list[list[int]]
 
@@ -22,7 +25,7 @@ class Board(pydantic.BaseModel):
         return self.__root__
 
     @property
-    def as_np(self) -> np.ndarray:
+    def np(self) -> np.ndarray:
         return np.array(self.data, dtype=np.int64)
 
     @property
@@ -100,6 +103,9 @@ class BoardPair(pydantic.BaseModel):
             rows.append("".join(row_parts))
         return "\n".join(rows)
 
+    def as_np(self, with_solution=True):
+        return (self.input.np, self.output.np if with_solution else None)
+
 
 class Riddle(pydantic.BaseModel):
     train: list[BoardPair]
@@ -120,3 +126,37 @@ class Riddle(pydantic.BaseModel):
             parts.append(f"TEST {idx}")
             parts.append(test_pair.fmt(colored=colored, with_output=with_test_outputs))
         return PAIR_GAP_STR.join(parts)
+
+    def as_np(self, with_solution=True):
+        return (
+            [board.as_np(with_solution=True) for board in self.train],
+            [board.as_np(with_solution=with_solution) for board in self.test],
+        )
+
+
+class EvalResult(pydantic.BaseModel):
+    riddle: Riddle
+    solution: list[BoardData]
+    board_size_scores: list[float]
+    board_content_scores: list[float]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    @property
+    def board_size_score(self):
+        return min(self.board_size_scores)
+
+    @property
+    def board_size_correct(self):
+        return self.board_size_score == 1.0
+
+    @property
+    def score(self):
+        if not self.board_size_correct:
+            return 0.0
+        return min(self.board_content_scores)
+
+    @property
+    def correct(self):
+        return self.score == 1.0  # todo: is this affected by FP stuff?
