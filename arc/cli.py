@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import webbrowser
 from pathlib import Path
 from typing import Optional
 
@@ -28,6 +29,9 @@ def show(
     random_id: bool = typer.Option(False),
     colored: bool = typer.Option(True),
     solution: bool = typer.Option(False),
+    arc_game: bool = typer.Option(
+        False, help="Open the riddle in volotat's arc-game (online)"
+    ),
     subdir: str = typer.Option("training"),
 ):
     if file:
@@ -40,7 +44,11 @@ def show(
         )
     else:
         raise ValueError("Not enough parameters")
-    typer.echo(riddle.fmt(colored=colored, with_test_outputs=solution))
+    if arc_game:
+        url = f"https://volotat.github.io/ARC-Game/?task={subdir}%2F{riddle.riddle_id}.json"  # noqa: E501
+        webbrowser.open(url)
+    else:
+        typer.echo(riddle.fmt(colored=colored, with_test_outputs=solution))
 
 
 @app.command()
