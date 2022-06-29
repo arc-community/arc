@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import itertools as itt
-from typing import Optional, Union
+from typing import Any, Optional
 
 import numpy as np
 import pydantic
@@ -14,11 +14,22 @@ BOARD_GAP_STR = " " * settings.board_gap
 PAIR_GAP_STR = "\n" + " " * settings.pair_gap + "\n"
 
 
-BoardData = Union[list[list[int]], np.ndarray]
-
-
 class Board(pydantic.BaseModel):
     __root__: list[list[int]]
+
+    @pydantic.validator("__root__", pre=True)
+    def validate_native_list(cls, v):
+        if isinstance(v, np.ndarray):
+            v = v.tolist()
+        return v
+
+    @pydantic.validator("__root__")
+    def validate_non_ragged(cls, v):
+        if len(set(lengths := list(map(len, v)))) != 1:
+            raise ValueError(
+                f"All rows of a Board must be of same lengths, but got {lengths=}"
+            )
+        return v
 
     @property
     def data(self):
@@ -75,6 +86,10 @@ class Board(pydantic.BaseModel):
         return "\n".join(
             self.fmt_row(row, colored=colored) for row in range(len(self.data))
         )
+
+
+TopKList = list[Board]
+RiddleSolution = list[TopKList]
 
 
 class BoardPair(pydantic.BaseModel):
@@ -134,29 +149,70 @@ class Riddle(pydantic.BaseModel):
         )
 
 
+class TaskData(pydantic.BaseModel):
+    topk: int = 1
+
+
+class Metric:
+    def __init__(self, name: str):
+        self.name = name
+
+    def compute(self, eval_result: "EvalResult") -> Any:
+        raise NotImplementedError()
+
+    def aggregate(self, task_data: TaskData, results: list[Any]) -> Any:
+        raise NotImplementedError()
+
+
+class Agent:
+    def __init__(self):
+        pass
+
+    def solve_riddle(self, riddle: Riddle, task_data: TaskData) -> RiddleSolution:
+        return [
+            self.solve_test_sample(riddle, task_data, test.input)
+            for test in riddle.test
+        ]
+
+    def solve_test_sample(
+        self, riddle: Riddle, task_data: TaskData, test: Board
+    ) -> TopKList:
+        raise NotImplementedError()
+
+
 class EvalResult(pydantic.BaseModel):
     riddle: Riddle
-    solution: list[BoardData]
-    board_size_scores: list[float]
-    board_content_scores: list[float]
+    task_data: TaskData
+    solution: RiddleSolution
 
-    class Config:
-        arbitrary_types_allowed = True
+    metrics_results: dict = {}
 
-    @property
-    def board_size_score(self):
-        return min(self.board_size_scores)
+    def compute_and_add_metric(self, metric: Metric) -> Any:
+        result = metric.compute(self)
+        self.metrics_results[metric.name] = result
+        return result
 
-    @property
-    def board_size_correct(self):
-        return self.board_size_score == 1.0
 
-    @property
-    def score(self):
-        if not self.board_size_correct:
-            return 0.0
-        return min(self.board_content_scores)
+class EvalResultList(pydantic.BaseModel):
+    task_data: TaskData
+    eval_results: list[EvalResult]
 
-    @property
-    def correct(self):
-        return self.score == 1.0  # todo: is this affected by FP stuff?
+    aggregation_results: dict = {}
+
+    def compute_and_add_metric(self, metric: Metric):
+        for eval_result in self.eval_results:
+            eval_result.compute_and_add_metric(metric)
+
+    def aggregate_and_add_metric(self, metric: Metric) -> Any:
+        results = [r.metrics_results[metric.name] for r in self.eval_results]
+        result = metric.aggregate(self.task_data, results)
+        self.aggregation_results[metric.name] = result
+        return result
+
+    def compute_and_aggregate_and_add_metric(self, metric: Metric):
+        self.compute_and_add_metric(metric)
+        return self.aggregate_and_add_metric(metric)
+
+    def compute_and_aggregate_and_add_metrics(self, metrics: list[Metric]):
+        for metric in metrics:
+            self.compute_and_aggregate_and_add_metric(metric)
