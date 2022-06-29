@@ -6,6 +6,7 @@ import pytest
 
 import arc.eval
 from arc.interface import Agent, Board, Riddle, TaskData, TopKList
+from arc.metrics import BoardSizeMetric, CorrectMetric
 from arc.settings import settings
 from arc.utils import dataset
 
@@ -47,5 +48,5 @@ class CheatingAgent(Agent):
 def test_evaluate_agent_on_riddle(riddle1, task_data):
     agent = CheatingAgent()
     eval_results = arc.eval.evaluate_agent_on_riddles(agent, [riddle1], task_data)
-    print(eval_results)
-    # assert eval_result.score == 1.0
+    arc.eval.apply_metrics(eval_results, [BoardSizeMetric(), CorrectMetric()])
+    assert eval_results.aggregation_results["correct"] == 1.0
