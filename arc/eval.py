@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
-from arc.interface import Agent, EvalResult, EvalResultList, Metric, Riddle, TaskData
+from arc.agents import Agent
+from arc.hints import Hints
+from arc.interface import EvalResult, EvalResultList, Metric, Riddle, TaskData
 
 
 def evaluate_agent_on_riddle(
     agent: Agent, riddle: Riddle, task_data: TaskData
 ) -> EvalResult:
-    solution = agent.solve_riddle(riddle, task_data=task_data)
+    hints = Hints(riddle=riddle)
+    solution = agent.solve_riddle(
+        task_data=task_data, hints=hints, train=riddle.train, test=riddle.test_inputs
+    )
     if (num_tests := len(riddle.test)) != (num_solutions := len(solution)):
         raise ValueError(
             f"Riddle has {num_tests} tests, but got {num_solutions} solutions."
@@ -23,6 +28,7 @@ def evaluate_agent_on_riddle(
         riddle=riddle,
         task_data=task_data,
         solution=solution,
+        hints_accessed=hints.hints_accessed,
     )
 
 
@@ -35,4 +41,5 @@ def evaluate_agent_on_riddles(agent: Agent, riddles: list[Riddle], task_data: Ta
 
 
 def apply_metrics(eval_results: EvalResultList, metrics: list[Metric]):
-    eval_results.compute_and_aggregate_and_add_metrics(metrics)
+    for metric in metrics:
+        eval_results.add_metric(metric)

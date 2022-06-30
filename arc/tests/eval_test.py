@@ -5,7 +5,9 @@ from pathlib import Path
 import pytest
 
 import arc.eval
-from arc.interface import Agent, Board, Riddle, TaskData, TopKList
+from arc.agents import Agent
+from arc.hints import BoardHints
+from arc.interface import Board, BoardPair, TaskData, TopKList
 from arc.metrics import BoardSizeMetric, CorrectMetric
 from arc.settings import settings
 from arc.utils import dataset
@@ -36,13 +38,14 @@ def test_list_dir():
 
 class CheatingAgent(Agent):
     def solve_test_sample(
-        self, riddle: Riddle, task_data: TaskData, test: Board
+        self,
+        task_data: TaskData,
+        hints: BoardHints,
+        train: list[BoardPair],
+        test: Board,
+        test_idx: int,
     ) -> TopKList:
-        for t in riddle.test:
-            if t.input == test:
-                return TopKList([t.output for _ in range(task_data.topk)])
-        else:
-            assert False
+        return TopKList([hints.output for _ in range(task_data.topk)])
 
 
 def test_evaluate_agent_on_riddle(riddle1, task_data):
@@ -50,3 +53,4 @@ def test_evaluate_agent_on_riddle(riddle1, task_data):
     eval_results = arc.eval.evaluate_agent_on_riddles(agent, [riddle1], task_data)
     arc.eval.apply_metrics(eval_results, [BoardSizeMetric(), CorrectMetric()])
     assert eval_results.aggregation_results["correct"] == 1.0
+    assert "output" in eval_results.hints_accessed

@@ -36,6 +36,10 @@ class Board(pydantic.BaseModel):
         return self.__root__
 
     @property
+    def data_flat(self):
+        return list(itt.chain.from_iterable(self.data))
+
+    @property
     def np(self) -> np.ndarray:
         return np.array(self.data, dtype=np.int64)
 
@@ -148,6 +152,10 @@ class Riddle(pydantic.BaseModel):
             [board.as_np(with_solution=with_solution) for board in self.test],
         )
 
+    @property
+    def test_inputs(self) -> list[Board]:
+        return [t.input for t in self.test]
+
 
 class TaskData(pydantic.BaseModel):
     topk: int = 1
@@ -164,30 +172,18 @@ class Metric:
         raise NotImplementedError()
 
 
-class Agent:
-    def __init__(self):
-        pass
-
-    def solve_riddle(self, riddle: Riddle, task_data: TaskData) -> RiddleSolution:
-        return [
-            self.solve_test_sample(riddle, task_data, test.input)
-            for test in riddle.test
-        ]
-
-    def solve_test_sample(
-        self, riddle: Riddle, task_data: TaskData, test: Board
-    ) -> TopKList:
-        raise NotImplementedError()
+HintsAccessed = set
 
 
 class EvalResult(pydantic.BaseModel):
     riddle: Riddle
     task_data: TaskData
     solution: RiddleSolution
+    hints_accessed: HintsAccessed = HintsAccessed()
 
     metrics_results: dict = {}
 
-    def compute_and_add_metric(self, metric: Metric) -> Any:
+    def add_metric(self, metric: Metric) -> Any:
         result = metric.compute(self)
         self.metrics_results[metric.name] = result
         return result
@@ -199,20 +195,24 @@ class EvalResultList(pydantic.BaseModel):
 
     aggregation_results: dict = {}
 
-    def compute_and_add_metric(self, metric: Metric):
-        for eval_result in self.eval_results:
-            eval_result.compute_and_add_metric(metric)
+    _hints_accessed: HintsAccessed = pydantic.PrivateAttr()
 
-    def aggregate_and_add_metric(self, metric: Metric) -> Any:
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._hints_accessed = HintsAccessed(
+            itt.chain.from_iterable(
+                result.hints_accessed for result in self.eval_results
+            )
+        )
+
+    @property
+    def hints_accessed(self):
+        return self._hints_accessed
+
+    def add_metric(self, metric: Metric):
+        for eval_result in self.eval_results:
+            eval_result.add_metric(metric)
         results = [r.metrics_results[metric.name] for r in self.eval_results]
         result = metric.aggregate(self.task_data, results)
         self.aggregation_results[metric.name] = result
         return result
-
-    def compute_and_aggregate_and_add_metric(self, metric: Metric):
-        self.compute_and_add_metric(metric)
-        return self.aggregate_and_add_metric(metric)
-
-    def compute_and_aggregate_and_add_metrics(self, metrics: list[Metric]):
-        for metric in metrics:
-            self.compute_and_aggregate_and_add_metric(metric)
