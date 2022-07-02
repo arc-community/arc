@@ -101,3 +101,7 @@ class CorrectMetric(MinValMetric, MeanAggMetric):
             return 1.0
         else:
             return 0.0
+
+
+def get_default_metrics() -> list[Metric]:
+    return [BoardSizeMetric(), CorrectMetric()]

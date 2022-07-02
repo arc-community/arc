@@ -11,8 +11,8 @@ from arc.metrics import MetricResultDict
 
 
 class Report(pydantic.BaseModel):
-    eval_result_list: EvalResultList
-    meric_result_dict: MetricResultDict = MetricResultDict()
+    eval_results: EvalResultList
+    metric_results: MetricResultDict = MetricResultDict()
     timestamp: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)
     tags: list[str] = []
     subdirs: list[str] = []

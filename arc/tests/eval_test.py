@@ -7,7 +7,7 @@ import pytest
 import arc.eval
 from arc import TaskData
 from arc.agents.cheating_agent import CheatingAgent
-from arc.metrics import BoardSizeMetric, CorrectMetric
+from arc.metrics import get_default_metrics
 from arc.settings import settings
 from arc.utils import dataset
 
@@ -37,9 +37,7 @@ def test_list_dir():
 
 def test_evaluate_agent_on_riddle(riddle1, task_data):
     agent = CheatingAgent()
-    eval_result_list = arc.eval.evaluate_agent_on_riddles(agent, [riddle1], task_data)
-    metric_result_dict = arc.eval.apply_metrics(
-        eval_result_list, [BoardSizeMetric(), CorrectMetric()]
-    )
-    assert metric_result_dict["correct"].aggregate_result == 1.0
-    assert "output" in eval_result_list.hints_accessed
+    metrics = get_default_metrics()
+    report = arc.eval.evaluate_and_report(agent, [riddle1], task_data, metrics=metrics)
+    assert report.metric_results["correct"].aggregate_result == 1.0
+    assert "output" in report.eval_results.hints_accessed

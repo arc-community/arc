@@ -93,6 +93,7 @@ def get_riddle_ids(subdirs: list[str] = ["training"]):
 
 
 def get_riddles(subdirs: list[str] = ["training"]) -> list[Riddle]:
+    logger.info(f"Loading riddles from {subdirs}")
     return [
         load_riddle_from_file(riddle_path)
         for riddle_path in get_riddle_paths(subdirs=subdirs).values()
