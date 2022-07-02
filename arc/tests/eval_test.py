@@ -5,9 +5,8 @@ from pathlib import Path
 import pytest
 
 import arc.eval
-from arc.agents import Agent
-from arc.hints import BoardHints
-from arc.interface import Board, BoardPair, TaskData, TopKList
+from arc import TaskData
+from arc.agents.cheating_agent import CheatingAgent
 from arc.metrics import BoardSizeMetric, CorrectMetric
 from arc.settings import settings
 from arc.utils import dataset
@@ -36,21 +35,11 @@ def test_list_dir():
     assert dataset.get_riddle_ids()[0] == "t001"
 
 
-class CheatingAgent(Agent):
-    def solve_test_sample(
-        self,
-        task_data: TaskData,
-        hints: BoardHints,
-        train: list[BoardPair],
-        test: Board,
-        test_idx: int,
-    ) -> TopKList:
-        return TopKList([hints.output for _ in range(task_data.topk)])
-
-
 def test_evaluate_agent_on_riddle(riddle1, task_data):
     agent = CheatingAgent()
-    eval_results = arc.eval.evaluate_agent_on_riddles(agent, [riddle1], task_data)
-    arc.eval.apply_metrics(eval_results, [BoardSizeMetric(), CorrectMetric()])
-    assert eval_results.aggregation_results["correct"] == 1.0
-    assert "output" in eval_results.hints_accessed
+    eval_result_list = arc.eval.evaluate_agent_on_riddles(agent, [riddle1], task_data)
+    metric_result_dict = arc.eval.apply_metrics(
+        eval_result_list, [BoardSizeMetric(), CorrectMetric()]
+    )
+    assert metric_result_dict["correct"].aggregate_result == 1.0
+    assert "output" in eval_result_list.hints_accessed

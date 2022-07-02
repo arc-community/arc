@@ -2,7 +2,8 @@
 
 from arc.agents import Agent
 from arc.hints import Hints
-from arc.interface import EvalResult, EvalResultList, Metric, Riddle, TaskData
+from arc.interface import EvalResult, EvalResultList, Riddle, TaskData
+from arc.metrics import Metric, MetricResultDict
 
 
 def evaluate_agent_on_riddle(
@@ -40,6 +41,13 @@ def evaluate_agent_on_riddles(agent: Agent, riddles: list[Riddle], task_data: Ta
     return eval_result_list
 
 
-def apply_metrics(eval_results: EvalResultList, metrics: list[Metric]):
+def apply_metrics(
+    eval_result_list: EvalResultList, metrics: list[Metric]
+) -> MetricResultDict:
+    eval_results = eval_result_list.eval_results
+    metric_results = MetricResultDict()
     for metric in metrics:
-        eval_results.add_metric(metric)
+        compute_results = [metric.compute(eval_result) for eval_result in eval_results]
+        metric_result = metric.aggregate(eval_result_list, compute_results)
+        metric_results[metric.name] = metric_result
+    return metric_results

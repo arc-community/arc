@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import itertools as itt
-from typing import Any, Optional
+from typing import Optional
 
 import numpy as np
 import pydantic
@@ -161,17 +161,6 @@ class TaskData(pydantic.BaseModel):
     topk: int = 1
 
 
-class Metric:
-    def __init__(self, name: str):
-        self.name = name
-
-    def compute(self, eval_result: "EvalResult") -> Any:
-        raise NotImplementedError()
-
-    def aggregate(self, task_data: TaskData, results: list[Any]) -> Any:
-        raise NotImplementedError()
-
-
 HintsAccessed = set
 
 
@@ -180,7 +169,6 @@ class EvalResult(pydantic.BaseModel):
     task_data: TaskData
     solution: RiddleSolution
     hints_accessed: HintsAccessed = HintsAccessed()
-    metrics_results: dict = {}
 
     @pydantic.validator("solution")
     def validate_solution(cls, v, values):
@@ -199,16 +187,10 @@ class EvalResult(pydantic.BaseModel):
                 )
         return v
 
-    def add_metric(self, metric: Metric) -> Any:
-        result = metric.compute(self)
-        self.metrics_results[metric.name] = result
-        return result
-
 
 class EvalResultList(pydantic.BaseModel):
     task_data: TaskData
     eval_results: list[EvalResult]
-    aggregation_results: dict = {}
 
     @pydantic.validator("eval_results")
     def validate_eval_results(cls, v, values):
@@ -228,11 +210,3 @@ class EvalResultList(pydantic.BaseModel):
                 result.hints_accessed for result in self.eval_results
             )
         )
-
-    def add_metric(self, metric: Metric):
-        for eval_result in self.eval_results:
-            eval_result.add_metric(metric)
-        results = [r.metrics_results[metric.name] for r in self.eval_results]
-        result = metric.aggregate(self.task_data, results)
-        self.aggregation_results[metric.name] = result
-        return result

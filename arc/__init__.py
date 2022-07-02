@@ -1,3 +1,14 @@
-__all__ = ["Board", "BoardPair", "Riddle"]
+from .agents import Agent
+from .hints import BoardHints, Hints
+from .interface import Board, BoardPair, Riddle, TaskData, TopKList
 
-from .interface import Board, BoardPair, Riddle
+__all__ = [
+    "Board",
+    "BoardPair",
+    "Riddle",
+    "TaskData",
+    "TopKList",
+    "Agent",
+    "BoardHints",
+    "Hints",
+]
