@@ -2,6 +2,7 @@
 
 import itertools as itt
 import json
+import os
 import random
 from concurrent import futures
 from pathlib import Path
@@ -18,7 +19,8 @@ from arc.utils import cache
 ARC_DATA_URL = "https://api.github.com/repos/fchollet/ARC/contents/data"
 
 
-def download_arc_dataset(output_dir: Path):
+def download_arc_dataset(output_dir: os.PathLike):
+    output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
     elif not output_dir.is_dir():
@@ -68,13 +70,14 @@ def get_dataset_dir(subdir: Optional[str] = None) -> Path:
     return dataset_dir
 
 
-def load_riddle_from_file(file_path: Path) -> Riddle:
+def load_riddle_from_file(file_path: os.PathLike) -> Riddle:
+    file_path = Path(file_path)
     json_data = json.loads(file_path.read_text())
     riddle = Riddle(**json_data, riddle_id=file_path.stem, subdir=file_path.parent.name)
     return riddle
 
 
-def get_riddles(subdirs: list[str] = ["training"]) -> dict[str, Path]:
+def get_riddle_paths(subdirs: list[str] = ["training"]) -> dict[str, Path]:
     if not subdirs:
         subdirs = ["all"]
     return dict(
@@ -86,7 +89,14 @@ def get_riddles(subdirs: list[str] = ["training"]) -> dict[str, Path]:
 
 
 def get_riddle_ids(subdirs: list[str] = ["training"]):
-    return list(sorted(get_riddles(subdirs=subdirs).keys()))
+    return list(sorted(get_riddle_paths(subdirs=subdirs).keys()))
+
+
+def get_riddles(subdirs: list[str] = ["training"]) -> list[Riddle]:
+    return [
+        load_riddle_from_file(riddle_path)
+        for riddle_path in get_riddle_paths(subdirs=subdirs).values()
+    ]
 
 
 def get_random_riddle_id(subdirs: list[str] = ["training"]):
@@ -94,6 +104,6 @@ def get_random_riddle_id(subdirs: list[str] = ["training"]):
 
 
 def load_riddle_from_id(riddle_id: str) -> Riddle:
-    riddles = get_riddles(subdirs=[])
+    riddles = get_riddle_paths(subdirs=[])
     riddle_path = riddles[riddle_id]
     return load_riddle_from_file(riddle_path)

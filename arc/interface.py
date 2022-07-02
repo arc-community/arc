@@ -180,8 +180,24 @@ class EvalResult(pydantic.BaseModel):
     task_data: TaskData
     solution: RiddleSolution
     hints_accessed: HintsAccessed = HintsAccessed()
-
     metrics_results: dict = {}
+
+    @pydantic.validator("solution")
+    def validate_solution(cls, v, values):
+        riddle = values["riddle"]
+        if len(v) != len(riddle.test):
+            raise ValueError(
+                f"Solution length must be equal to number of test pairs "
+                f"({len(riddle.test)}), but got {len(v)=}"
+            )
+        for solution in v:
+            task_data = values["task_data"]
+            if len(solution) != task_data.topk:
+                raise ValueError(
+                    f"Solution length must be equal to topk ({task_data.topk}),"
+                    f" but got {len(solution)=}"
+                )
+        return v
 
     def add_metric(self, metric: Metric) -> Any:
         result = metric.compute(self)
@@ -192,22 +208,26 @@ class EvalResult(pydantic.BaseModel):
 class EvalResultList(pydantic.BaseModel):
     task_data: TaskData
     eval_results: list[EvalResult]
-
     aggregation_results: dict = {}
 
-    _hints_accessed: HintsAccessed = pydantic.PrivateAttr()
+    @pydantic.validator("eval_results")
+    def validate_eval_results(cls, v, values):
+        task_data = values["task_data"]
+        for eval_result in v:
+            if eval_result.task_data != task_data:
+                raise ValueError(
+                    f"EvalResult task_data must be equal to task_data,"
+                    f" but got {eval_result.task_data=}"
+                )
+        return v
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        self._hints_accessed = HintsAccessed(
+    @property
+    def hints_accessed(self):
+        return HintsAccessed(
             itt.chain.from_iterable(
                 result.hints_accessed for result in self.eval_results
             )
         )
-
-    @property
-    def hints_accessed(self):
-        return self._hints_accessed
 
     def add_metric(self, metric: Metric):
         for eval_result in self.eval_results:
