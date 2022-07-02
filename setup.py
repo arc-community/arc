@@ -7,6 +7,7 @@ setup(
     install_requires=[
         "numpy",
         "typer[all]",
+        "tabulate",
         "requests",
         "loguru",
         "tqdm",
