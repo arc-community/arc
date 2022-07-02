@@ -7,8 +7,8 @@ from typing import Optional
 
 import typer
 
-from arc import TaskData, evaluate_and_report, get_default_metrics
-from arc.metrics import get_all_metrics
+from arc import TaskData, evaluate_and_report
+from arc.metrics import get_all_metrics, get_default_metrics
 from arc.settings import settings
 from arc.utils import dataset
 
