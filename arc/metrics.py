@@ -161,5 +161,9 @@ class InverseRankOfCorrectMetric(Metric[float, float]):
 register_metric(InverseRankOfCorrectMetric())
 
 
+def get_all_metrics() -> list[Metric]:
+    return list(METRICS.values())
+
+
 def get_default_metrics() -> list[Metric]:
     return get_metrics(["board_size", "correct"])

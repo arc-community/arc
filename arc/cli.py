@@ -8,6 +8,7 @@ from typing import Optional
 import typer
 
 from arc import TaskData, evaluate_and_report, get_default_metrics
+from arc.metrics import get_all_metrics
 from arc.settings import settings
 from arc.utils import dataset
 
@@ -64,6 +65,7 @@ def eval(
     agent_path: str,
     topk: int = typer.Option(settings.default_topk),
     default_metrics: bool = typer.Option(True),
+    all_metrics: bool = typer.Option(False),
 ):
     typer.echo(f"Evaluating {agent_path}")
     agent_module_name, agent_classname = agent_path.split(":")
@@ -74,6 +76,8 @@ def eval(
     riddles = dataset.get_riddles()
     task_data = TaskData(topk=topk)
     metrics = get_default_metrics() if default_metrics else []
+    if all_metrics:
+        metrics = get_all_metrics()
     report = evaluate_and_report(agent, riddles, task_data, metrics)
     print(report.fmt_txt())
 
