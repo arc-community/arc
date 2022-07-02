@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import webbrowser
+from importlib import import_module
 from pathlib import Path
 from typing import Optional
 
 import typer
 
+from arc import TaskData, evaluate_and_report, get_default_metrics
 from arc.utils import dataset
 
 app = typer.Typer()
@@ -54,6 +56,21 @@ def show(
 @app.command()
 def list():
     typer.echo("\n".join(dataset.get_riddle_ids()))
+
+
+@app.command()
+def eval(agent_path: str):
+    typer.echo(f"Evaluating {agent_path}")
+    agent_module_name, agent_classname = agent_path.split(":")
+    module = import_module(agent_module_name)
+    agent_class = getattr(module, agent_classname)
+    agent = agent_class()
+
+    riddles = dataset.get_riddles()
+    task_data = TaskData(topk=1)
+    metrics = get_default_metrics()
+    report = evaluate_and_report(agent, riddles, task_data, metrics)
+    print(report.metric_results)
 
 
 if __name__ == "__main__":
