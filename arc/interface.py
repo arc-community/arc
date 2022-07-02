@@ -13,6 +13,8 @@ CELL_PADDING_STR = " " * settings.cell_padding
 BOARD_GAP_STR = " " * settings.board_gap
 PAIR_GAP_STR = "\n" + " " * settings.pair_gap + "\n"
 
+COLORMAP = {0: 0, 1: 4, 2: 1, 3: 2, 4: 3, 5: 8, 6: 5, 7: 166, 8: 6, 9: 52}
+
 
 class Board(pydantic.BaseModel):
     __root__: list[list[int]]
@@ -69,6 +71,7 @@ class Board(pydantic.BaseModel):
 
     def fmt_cell(self, row: int, col: int, colored=False) -> str:
         value = self.data[row][col]
+        value = COLORMAP[value]
         value_str = f"{CELL_PADDING_STR}{value}{CELL_PADDING_STR}"
         if colored:
             return f"{fg(15)}{bg(value)}{value_str}{attr(0)}"

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from arc import TaskData, evaluate_and_report, get_default_metrics
+from arc import TaskData, evaluate_and_report
 from arc.agents.dummy_agents import CheatingAgent
-from arc.metrics import InverseRankOfCorrectMetric
+from arc.metrics import InverseRankOfCorrectMetric, get_default_metrics
 from arc.utils import dataset
 
 
