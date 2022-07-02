@@ -6,7 +6,7 @@ import pytest
 
 import arc.eval
 from arc import TaskData
-from arc.agents.cheating_agent import CheatingAgent
+from arc.agents.dummy_agents import CheatingAgent
 from arc.metrics import get_default_metrics
 from arc.settings import settings
 from arc.utils import dataset

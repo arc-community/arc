@@ -158,7 +158,7 @@ class Riddle(pydantic.BaseModel):
 
 
 class TaskData(pydantic.BaseModel):
-    topk: int = 1
+    topk: int = settings.default_topk
 
 
 HintsAccessed = set

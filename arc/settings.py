@@ -12,6 +12,7 @@ class Settings(pydantic.BaseSettings):
     cell_padding: int = 1
     board_gap: int = 5
     pair_gap: int = 1
+    default_topk: int = 1
 
 
 settings = Settings()

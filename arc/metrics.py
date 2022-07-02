@@ -85,6 +85,17 @@ class Metric(Generic[C, A]):
         return result
 
 
+METRICS = {}
+
+
+def register_metric(metric: Metric):
+    METRICS[metric.name] = metric
+
+
+def get_metrics(names: list[str]) -> list[Metric]:
+    return [METRICS[name] for name in names]
+
+
 class MeanAggMetric(Metric[float, float]):
     def _aggregate(
         self, eval_result_list: EvalResultList, compute_results: list[float]
@@ -106,6 +117,9 @@ class BoardSizeMetric(MeanAggMetric, Metric[float, float]):
         return min_over_tests(eval_result, _get_value)
 
 
+register_metric(BoardSizeMetric())
+
+
 class CorrectMetric(MeanAggMetric, Metric[float, float]):
     def __init__(self):
         super().__init__(name="correct")
@@ -119,6 +133,9 @@ class CorrectMetric(MeanAggMetric, Metric[float, float]):
                 return 0.0
 
         return min_over_tests(eval_result, _get_value)
+
+
+register_metric(CorrectMetric())
 
 
 class InverseRankOfCorrectMetric(Metric[float, float]):
@@ -141,5 +158,8 @@ class InverseRankOfCorrectMetric(Metric[float, float]):
         return safe_mean([r for r in compute_results if r > 0.0])
 
 
+register_metric(InverseRankOfCorrectMetric())
+
+
 def get_default_metrics() -> list[Metric]:
-    return [BoardSizeMetric(), CorrectMetric()]
+    return get_metrics(["board_size", "correct"])
