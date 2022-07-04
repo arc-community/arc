@@ -71,10 +71,10 @@ class Board(pydantic.BaseModel):
 
     def fmt_cell(self, row: int, col: int, colored=False) -> str:
         value = self.data[row][col]
-        value = COLORMAP[value]
+        color = COLORMAP[value]
         value_str = f"{CELL_PADDING_STR}{value}{CELL_PADDING_STR}"
         if colored:
-            return f"{fg(15)}{bg(value)}{value_str}{attr(0)}"
+            return f"{fg(15)}{bg(color)}{value_str}{attr(0)}"
         else:
             return value_str
 
