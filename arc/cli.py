@@ -66,8 +66,10 @@ def show(
 
 
 @app.command()
-def list():
-    typer.echo("\n".join(dataset.get_riddle_ids()))
+def list(
+    subdir=typer.Option("training"),
+):
+    typer.echo("\n".join(dataset.get_riddle_ids(subdirs=[subdir])))
 
 
 @app.command()
