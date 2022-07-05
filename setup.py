@@ -14,6 +14,7 @@ setup(
         "pydantic",
         "filelock",
         "colored",
+        "matplotlib",
     ],
     extras_require={
         "dev": [

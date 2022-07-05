@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from matplotlib import pyplot as plt
 
 from arc import TaskData, evaluate_and_report
 from arc.metrics import get_all_metrics, get_default_metrics
@@ -33,10 +34,9 @@ def show(
     random_id: bool = typer.Option(False),
     colored: bool = typer.Option(True),
     solution: bool = typer.Option(False),
-    arc_game: bool = typer.Option(
-        False, help="Open the riddle in volotat's arc-game (online)"
-    ),
     subdir: str = typer.Option("training"),
+    output_format: str = typer.Option("term", help="['term', 'arc-game', 'pyplot']"),
+    output_path: Optional[Path] = typer.Option(None),
 ):
     if file:
         riddle = dataset.load_riddle_from_file(file)
@@ -48,11 +48,21 @@ def show(
         )
     else:
         raise ValueError("Not enough parameters")
-    if arc_game:
+    if output_format == "arc-game":
         url = f"https://volotat.github.io/ARC-Game/?task={subdir}%2F{riddle.riddle_id}.json"  # noqa: E501
         webbrowser.open(url)
-    else:
+    elif output_format == "pyplot":
+        riddle.fmt_plt(with_test_outputs=solution)
+        plt.show()
+    elif output_format == "image":
+        riddle.fmt_plt(with_test_outputs=solution)
+        if output_path is None:
+            raise ValueError("Must provide --output-path when saving to image")
+        plt.savefig(str(output_path))
+    elif output_format == "term":
         typer.echo(riddle.fmt(colored=colored, with_test_outputs=solution))
+    else:
+        raise ValueError(f"Unknown output format: {output_format}")
 
 
 @app.command()

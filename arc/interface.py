@@ -6,6 +6,7 @@ from typing import Optional
 import numpy as np
 import pydantic
 from colored import attr, bg, fg
+from matplotlib import pyplot as plt
 
 from arc.settings import settings
 
@@ -148,6 +149,26 @@ class Riddle(pydantic.BaseModel):
             parts.append(f"TEST {idx}")
             parts.append(test_pair.fmt(colored=colored, with_output=with_test_outputs))
         return PAIR_GAP_STR.join(parts)
+
+    def fmt_plt(self, with_test_outputs=False):
+        parts = [pair.as_np() for pair in self.train]
+        parts.extend(pair.as_np(with_solution=with_test_outputs) for pair in self.test)
+
+        def _draw_board(board: Optional[np.ndarray], ax: plt.Axes):
+            if board is None:
+                ax.remove()
+            else:
+                ax.matshow(board, cmap="nipy_spectral", vmin=0.0, vmax=9.0)
+                ax.xaxis.set_visible(False)
+                ax.yaxis.set_visible(False)
+
+        fig, axs = plt.subplots(len(parts), 2)
+        for (inboard, outboard), (inax, outax) in zip(parts, axs):
+            _draw_board(inboard, inax)
+            _draw_board(outboard, outax)
+
+        plt.tight_layout()
+        return fig, axs
 
     def as_np(self, with_solution=True):
         return (
