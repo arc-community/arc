@@ -138,6 +138,26 @@ class CorrectMetric(MeanAggMetric, Metric[float, float]):
 register_metric(CorrectMetric())
 
 
+class CorrectPixelsMetric(MeanAggMetric, Metric[float, float]):
+    def __init__(self):
+        super().__init__(name="correct_pixels")
+
+    def _compute(self, eval_result: EvalResult) -> float:
+        def _get_value(test: BoardPair, topk_list: TopKList) -> float:
+            def _get_correct_pixels(trial) -> float:
+                if trial.shape == test.output.shape:
+                    return np.mean(np.equal(trial.np, test.output.np)).item()
+                else:
+                    return 0.0
+
+            return max(_get_correct_pixels(trial) for trial in topk_list)
+
+        return min_over_tests(eval_result, _get_value)
+
+
+register_metric(CorrectPixelsMetric())
+
+
 class InverseRankOfCorrectMetric(Metric[float, float]):
     def __init__(self):
         super().__init__(name="inverse_rank_of_correct")
@@ -166,4 +186,4 @@ def get_all_metrics() -> list[Metric]:
 
 
 def get_default_metrics() -> list[Metric]:
-    return get_metrics(["board_size", "correct"])
+    return get_metrics(["board_size", "correct", "correct_pixels"])
