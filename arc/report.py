@@ -37,4 +37,7 @@ class Report(pydantic.BaseModel):
         )
         lines.append("Aggregation results:")
         lines.append(aggragation_table)
+        lines.append("")
+        hints_string = ",".join(sorted(self.eval_results.hints_accessed))
+        lines.append(f"Hints accessed: {hints_string}")
         return "\n".join(lines)

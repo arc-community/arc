@@ -78,14 +78,15 @@ def eval(
     topk: int = typer.Option(settings.default_topk),
     default_metrics: bool = typer.Option(True),
     all_metrics: bool = typer.Option(False),
+    subdir: str = typer.Option("training"),
 ):
-    typer.echo(f"Evaluating {agent_path}")
+    typer.echo(f"Evaluating {agent_path} on {subdir}")
     agent_module_name, agent_classname = agent_path.split(":")
     module = import_module(agent_module_name)
     agent_class = getattr(module, agent_classname)
     agent = agent_class()
 
-    riddles = dataset.get_riddles()
+    riddles = dataset.get_riddles(subdirs=[subdir])
     task_data = TaskData(topk=topk)
     metrics = get_default_metrics() if default_metrics else []
     if all_metrics:
