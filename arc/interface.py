@@ -104,7 +104,7 @@ RiddleSolution = list[TopKList]
 class BoardPair(pydantic.BaseModel):
     input: Board
     output: Board
-    original: Optional[BoardPair] = None
+    original: Optional['BoardPair'] = None
     default_augment_funcs: Optional[list[Callable]] = None
 
     def fmt(self, colored=False, with_output=True) -> str:
@@ -132,7 +132,7 @@ class BoardPair(pydantic.BaseModel):
     def as_np(self, with_solution=True):
         return (self.input.np, self.output.np if with_solution else None)
     
-    def augment(self, augment_funcs: list[Callable]=None, with_solution: bool=True) -> BoardPair:
+    def augment(self, augment_funcs: list[Callable]=None, with_solution: bool=True) -> 'BoardPair':
         if not augment_funcs and not self.default_augment_funcs:
             raise ValueError(f"No augmentation functions found. Pass augment_funcs to augment method or set default_augment_funcs")
         augment_funcs = augment_funcs if augment_funcs else self.default_augment_funcs
@@ -140,7 +140,7 @@ class BoardPair(pydantic.BaseModel):
         augmenter = partial(reduce, lambda acc,f: f(acc), augment_funcs)
         return self._augment(augmenter,with_solution)
     
-    def _augment(self, augmenter: Callable, with_solution: bool) -> BoardPair:
+    def _augment(self, augmenter: Callable, with_solution: bool) -> 'BoardPair':
         this = self if self.original is None else self.original
         input = augmenter(this.input.data)
         output = augmenter(this.output.data) if with_solution else None
@@ -152,7 +152,7 @@ class Riddle(pydantic.BaseModel):
     test: list[BoardPair]
     riddle_id: Optional[str] = None
     subdir: Optional[str] = None
-    original: Optional[Riddle] = None
+    original: Optional['Riddle'] = None
     default_augment_funcs: Optional[list[Callable]] = None
 
     def fmt(self, colored=False, with_test_outputs=False) -> str:
@@ -195,7 +195,7 @@ class Riddle(pydantic.BaseModel):
             [board.as_np(with_solution=with_solution) for board in self.test],
         )
     
-    def augment(self, augment_funcs: list[Callable]=None, with_solution=True) -> Riddle:
+    def augment(self, augment_funcs: list[Callable]=None, with_solution=True) -> 'Riddle':
         if not augment_funcs and not self.default_augment_funcs:
             raise ValueError(f"No augmentation functions found. Pass augment_funcs to augment method or set default_augment_funcs")
         augment_funcs = augment_funcs if augment_funcs else self.default_augment_funcs
@@ -203,7 +203,7 @@ class Riddle(pydantic.BaseModel):
         augmenter = partial(reduce, lambda acc,f: f(acc), augment_funcs)
         return self._augment(augmenter, with_solution) 
     
-    def _augment(self, augmenter, with_solution) -> Riddle:
+    def _augment(self, augmenter, with_solution) -> 'Riddle':
         this = self if self.original is None else self.original
         train = [board._augment(with_solution=True, augmenter=augmenter) for board in this.train]
         test = [board._augment(with_solution=with_solution, augmenter=augmenter) for board in this.test]
