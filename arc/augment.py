@@ -33,10 +33,10 @@ def random_rotation_seed(choice:int = None) -> Callable:
 def random_reflect_seed(choice:int = None) -> Callable:
     
     def reflect_x_axis(board: Board) -> list[list[int]]:  
-        return list(reversed(board))
+        return list(reversed(board.data))
 
     def reflect_y_axis(board: Board) -> list[list[int]]: 
-        return [list(reversed(x)) for x in board]
+        return [list(reversed(x)) for x in board.data]
     
     reflect_funcs = [reflect_x_axis, reflect_y_axis, noop]
     func = random.choice(reflect_funcs) if choice is None else reflect_funcs
@@ -54,6 +54,6 @@ def random_recolor_seed(include0: bool = False) -> Callable:
         colours = [0] + random.sample(list(range(1,10)),9)
 
     def random_recolor(board: Board) -> list[list[int]]:
-        return [[colours[o] for o in row] for row in board]
+        return [[colours[o] for o in row] for row in board.data]
 
     return random_recolor
