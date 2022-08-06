@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from typing import Optional
 
 import filelock
 
 from arc.settings import settings
 
 
-def get_cache_dir(subdir: str = None) -> Path:
+def get_cache_dir(subdir: Optional[str] = None) -> Path:
     """
     Get the cache directory.
 

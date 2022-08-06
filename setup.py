@@ -15,6 +15,7 @@ setup(
         "filelock",
         "colored",
         "matplotlib",
+        "pyyaml",
     ],
     extras_require={
         "dev": [

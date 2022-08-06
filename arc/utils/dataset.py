@@ -10,23 +10,45 @@ from typing import Optional
 
 import requests
 import tqdm
+import yaml
 from loguru import logger
 
 from arc.interface import Riddle
 from arc.settings import settings
 from arc.utils import cache
 
-ARC_DATA_URL = "https://api.github.com/repos/fchollet/ARC/contents/data"
+DEFAULT_INVENTORY_FN = "default_inventory.yaml"
 
 
-def download_arc_dataset(output_dir: os.PathLike):
+def download_arc_dataset(
+    output_dir: Optional[os.PathLike] = None,
+    inventory_path: Optional[os.PathLike] = None,
+):
+    if output_dir is None:
+        output_dir = get_cached_dataset_dir()
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
     elif not output_dir.is_dir():
         raise ValueError(f"{output_dir} is not a directory")
 
-    for subdir in ["training", "evaluation"]:
+    if inventory_path is None:
+        inventory_dir = Path(__file__).parent
+        while inventory_path := inventory_dir / DEFAULT_INVENTORY_FN:
+            if inventory_path.exists() and inventory_path.is_file():
+                break
+            if inventory_dir == Path("/"):
+                raise ValueError(
+                    f"Could not find {DEFAULT_INVENTORY_FN=} in parents of {__file__}"
+                )
+            inventory_dir = inventory_dir.parent
+
+    inventory_path = Path(inventory_path)
+
+    with inventory_path.open() as f:
+        inventory = yaml.safe_load(f)
+
+    for subdir, subdir_data in inventory["subsets"].items():
         logger.info(f"Downloading {subdir} dataset")
         subdir_path = output_dir / subdir
         if not subdir_path.exists():
@@ -34,7 +56,7 @@ def download_arc_dataset(output_dir: os.PathLike):
         elif not subdir_path.is_dir():
             raise ValueError(f"{subdir_path} is not a directory")
 
-        url = f"{ARC_DATA_URL}/{subdir}"
+        url = subdir_data["github_api_url"]
         items = requests.get(url).json()
 
         def _download_item(item):
@@ -51,12 +73,16 @@ def download_arc_dataset(output_dir: os.PathLike):
                 pass
 
 
-def get_cached_dataset_dir() -> Path:
+def get_cached_dataset_dir(not_exist_ok=False) -> Path:
     cache_dir = cache.get_cache_dir() / "dataset"
     if not cache_dir.exists():
-        with cache.cache_lock:
-            if not cache_dir.exists():
-                download_arc_dataset(cache_dir)
+        if not_exist_ok:
+            logger.warning(f"{cache_dir=} does not exist.")
+        else:
+            raise ValueError(
+                f"{cache_dir=} does not exist."
+                "maybe run arc download-arc-dataset first."
+            )
     return cache_dir
 
 

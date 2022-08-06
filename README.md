@@ -4,6 +4,7 @@
 
 ```bash
 pip3 install -e ".[dev]"
+arc download-arc-dataset
 ```
 
 

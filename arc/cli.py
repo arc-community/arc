@@ -22,9 +22,12 @@ def main(name: str):
 
 
 @app.command()
-def download_arc_dataset(output_dir: Path):
-    typer.echo(f"Downloading arc dataset to {output_dir}")
-    dataset.download_arc_dataset(output_dir)
+def download_arc_dataset(
+    output_dir: Optional[Path] = typer.Option(None),
+    inventory_path: Optional[Path] = typer.Option(None),
+):
+    typer.echo(f"Downloading arc dataset to {output_dir=} from {inventory_path=}")
+    dataset.download_arc_dataset(output_dir=output_dir, inventory_path=inventory_path)
 
 
 @app.command()

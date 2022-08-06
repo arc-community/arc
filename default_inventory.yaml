@@ -1,0 +1,7 @@
+subsets:
+  training:
+    github_api_url: https://api.github.com/repos/fchollet/ARC/contents/data/training
+  evaluation:
+    github_api_url: https://api.github.com/repos/fchollet/ARC/contents/data/evaluation
+  yk:
+    github_api_url: https://api.github.com/repos/arc-community/arc/contents/levels/yk
