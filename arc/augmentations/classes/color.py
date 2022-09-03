@@ -2,8 +2,8 @@ import functools
 import random
 from arc.interface import BoardPair,Riddle
 from typing import Union
-from augmentations import functional
-from augmentations.classes.helpers import same_aug_for_all_pairs_helper
+from arc.augmentations import functional
+from arc.augmentations.classes.helpers import same_aug_for_all_pairs_helper
 
 """
 Should usually have an include_0 parameter for color augs, since 0 is a special background color

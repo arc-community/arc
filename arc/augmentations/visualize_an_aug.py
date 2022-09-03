@@ -2,12 +2,12 @@ import functools
 import random
 import time
 from arc.utils.dataset import get_riddles
-from augmentations import functional
-from augmentations.classes.color import RandomColor
-from augmentations.classes.helpers import same_aug_for_all_pairs_helper
-from augmentations.classes.spatial import Direction, RandomDoubleInputBoard, RandomPadInputOnly, RandomPad, RandomReflect, RandomRotate, RandomSuperResolution
-from augmentations.vis_helpers import plot_task
-from augmentations.classes import RandomCropInputAndOuput
+from arc.augmentations import functional
+from arc.augmentations.classes.color import RandomColor
+from arc.augmentations.classes.helpers import same_aug_for_all_pairs_helper
+from arc.augmentations.classes.spatial import Direction, RandomDoubleInputBoard, RandomPadInputOnly, RandomPad, RandomReflect, RandomRotate, RandomSuperResolution
+from arc.augmentations.vis_helpers import plot_task
+from arc.augmentations.classes import RandomCropInputAndOuput
 from torchvision import transforms
 
 if __name__ == "__main__":

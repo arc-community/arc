@@ -1,9 +1,10 @@
+"""Spatial augmentations classes"""
 import random
-from arc.interface import BoardPair, Riddle
 from typing import Union
-from .. import functional
-from ..functional import Direction
-from augmentations.classes.helpers import p_and_same_aug_helper, same_aug_for_all_pairs_helper
+from arc.interface import BoardPair, Riddle
+from arc.augmentations import functional
+from arc.augmentations.functional import Direction
+from arc.augmentations.classes.helpers import p_and_same_aug_helper
 
 class RandomCropInputAndOuput:
     def __init__(self, p:float, same_aug_for_all_pairs:bool,possible_num_cols_to_crop:list[int]=[1,2],possible_num_rows_to_crop:list[int]=[1,2]):
