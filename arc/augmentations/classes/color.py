@@ -1,36 +1,46 @@
 import functools
 import random
-from arc.interface import BoardPair,Riddle
 from typing import Union
-from arc.augmentations import functional
-from arc.augmentations.classes.helpers import same_aug_for_all_pairs_helper
 
-"""
-Should usually have an include_0 parameter for color augs, since 0 is a special background color
-"""
+from arc.augmentations.classes.helpers import same_aug_for_all_pairs_helper
+from arc.augmentations.functional.color import permute_color
+from arc.interface import BoardPair, Riddle
+
+
 class RandomColor(object):
-    def __init__(self, p:float,include_0:bool = False, same_aug_for_all_pairs:bool = True):
+    def __init__(
+        self, p: float, include_0: bool = False, same_aug_for_all_pairs: bool = True
+    ):
         self.p = p
         self.same_aug_for_all_pairs = same_aug_for_all_pairs
         self.include_0 = include_0
 
     @staticmethod
-    def get_params( seed, **kwargs):
+    def get_params(seed, **kwargs):
         """
         Get parameters for this augmenter. Must use the seed provided
         """
         random.seed(seed)
-        if kwargs['include_0']:
-            colours = random.sample(list(range(10)),10)
-        else: 
-            colours = [0] + random.sample(list(range(1,10)),9)
+        if kwargs["include_0"]:
+            colours = random.sample(list(range(10)), 10)
+        else:
+            colours = [0] + random.sample(list(range(1, 10)), 9)
         return (colours,)
 
-    def __call__(self, input:Union[BoardPair,list[BoardPair],Riddle])->Union[BoardPair,list[BoardPair]]:
-        func = functional.permute_color
+    def __call__(
+        self, input: Union[BoardPair, list[BoardPair], Riddle]
+    ) -> Union[BoardPair, list[BoardPair]]:
+        func = permute_color
         if random.random() < self.p:
-            get_params_method = functools.partial(self.get_params,include_0=self.include_0)
-            return same_aug_for_all_pairs_helper(input, get_params_method=get_params_method, same_aug_for_all_pairs = self.same_aug_for_all_pairs, transformation_function=func)
+            get_params_method = functools.partial(
+                self.get_params, include_0=self.include_0
+            )
+            return same_aug_for_all_pairs_helper(
+                input,
+                get_params_method=get_params_method,
+                same_aug_for_all_pairs=self.same_aug_for_all_pairs,
+                transformation_function=func,
+            )
         else:
             return input
 

@@ -10,10 +10,10 @@ Each augmentation class has a corresponding function in augmentations.functional
     - Mask augmentation (random pixels masked with a sparsity parameter)
     - Unique mapping between color and pattern
     - Static noise augmentation (add static noise)
-    - Static noise augmentation that tries to add static with colors not in the puzzle 
+    - Static noise augmentation that tries to add static with colors not in the puzzle
     - Reorder puzzle training boards (randomly)
     - Some  augmentation that demonstrates the concept of correspondence?
-    - Object detector in input and output and finding objects that are in both, then maybe changing the entire object 
+    - Object detector in input and output and finding objects that are in both, then maybe changing the entire object
     - Repeat board with augmentation such as reflect
     - Join different boards from same riddle into single board (with and without added augmentations)
     - super res scale everything except background color by a random factor, maybe only across a specifix x/y axis
