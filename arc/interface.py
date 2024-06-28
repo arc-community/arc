@@ -17,16 +17,16 @@ PAIR_GAP_STR = "\n" + " " * settings.pair_gap + "\n"
 COLORMAP = {0: 0, 1: 4, 2: 1, 3: 2, 4: 3, 5: 8, 6: 5, 7: 166, 8: 6, 9: 52}
 
 
-class Board(pydantic.BaseModel):
-    __root__: list[list[int]]
+class Board(pydantic.RootModel):
+    root: list[list[int]]
 
-    @pydantic.validator("__root__", pre=True)
+    @pydantic.validator("root", pre=True)
     def validate_native_list(cls, v):
         if isinstance(v, np.ndarray):
             v = v.tolist()
         return v
 
-    @pydantic.validator("__root__")
+    @pydantic.validator("root")
     def validate_non_ragged(cls, v):
         if len(set(lengths := list(map(len, v)))) != 1:
             raise ValueError(
@@ -36,7 +36,7 @@ class Board(pydantic.BaseModel):
 
     @property
     def data(self):
-        return self.__root__
+        return self.root
 
     @property
     def data_flat(self):

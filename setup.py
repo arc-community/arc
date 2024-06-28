@@ -12,6 +12,7 @@ setup(
         "loguru",
         "tqdm",
         "pydantic",
+        "pydantic-settings",
         "filelock",
         "colored",
         "matplotlib",

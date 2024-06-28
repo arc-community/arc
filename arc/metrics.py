@@ -6,7 +6,6 @@ from typing import Callable, Generic, Optional, TypeVar
 
 import numpy as np
 import pydantic
-import pydantic.generics
 
 from arc.interface import Board, BoardPair, EvalResult, EvalResultList, TopKList
 
@@ -14,7 +13,7 @@ C = TypeVar("C")
 A = TypeVar("A")
 
 
-class MetricResult(pydantic.generics.GenericModel, Generic[C, A]):
+class MetricResult(pydantic.BaseModel, Generic[C, A]):
     name: str
     compute_results: Optional[list[C]] = None
     aggregate_result: Optional[A] = None
