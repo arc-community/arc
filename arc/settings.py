@@ -3,10 +3,10 @@
 import os.path
 from typing import Optional
 
-import pydantic
+from pydantic_settings import BaseSettings
 
 
-class Settings(pydantic.BaseSettings):
+class Settings(BaseSettings):
     cache_path: str = os.path.expanduser("~/.arc/cache")
     dataset_dir: Optional[str] = None
     cell_padding: int = 1
